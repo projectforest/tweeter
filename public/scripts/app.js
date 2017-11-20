@@ -6,12 +6,20 @@
 
 $(document).ready( () => {
 
+  // handles toggling of new-tweet section
+  $('#nav-bar .compose').on('click', function() {
+    $('section.new-tweet').slideToggle('fast', function() {
+      $(this).find('textarea').focus();
+    });
+  });
+
   // use jquery's .text() to escape user-inputted strings
   function escape(str) {
     let p = $('<p>').text(str);
     return p[0].innerHTML;
   }
 
+  // takes in tweet object and returns single tweet article HTML
   function createTweetElement(tweet) {
     let created_at = new Date(tweet.created_at).toString().split(' ').slice(0, 4).join(' ');
     let header = '<header>' +
@@ -32,13 +40,18 @@ $(document).ready( () => {
     return article;
   }
 
+  // takes in list of tweets objects
+  // appends tweets to .tweets container in index.html
   function renderTweets(tweets) {
     for(let tweet of tweets) {
       $('.tweets').append(createTweetElement(tweet));
     }
   }
+
+  // GETs JSON data from /tweets route
+  // passes result to renderTweets()
   function loadTweets() {
-    $.getJSON('tweets', function(tweets) {
+    $.getJSON('tweets').then(function(tweets) {
       renderTweets(tweets);
     });
   }
@@ -63,7 +76,7 @@ $(document).ready( () => {
       } else if(140 - input.val().length < 0) {
         $(this).after('<p>Error: Input exceeds 140 characters</p>');
       } else {
-        $.post('tweets', input.serialize(), function(tweet) {
+        $.post('tweets', input.serialize()).then(function(tweet) {
           $('.tweets').prepend(createTweetElement(tweet));
           input.val('');
         });
