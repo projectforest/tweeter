@@ -19,7 +19,19 @@ body {
   color: #244751;
   background-color: #eee;
   font-family: 'Roboto Condensed', sans-serif;
+  text-align: center;
 }
+
+.container {
+  background: #FFF;
+  display: inline-block;
+  padding: 2em;
+  position: relative;
+  top: 80px;
+  width: 450px;
+  z-index: 1;
+}
+
 
 /*
  * Additional CSS can be defined below or in other CSS files, as per instructions
