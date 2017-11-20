@@ -2,6 +2,7 @@
   background: #eee;
   border: 1px solid #D3D3D3;
   border-radius: 5px;
+  height: 135px;
   padding: 0.5em;
   text-align: left;
 }
@@ -20,4 +21,16 @@
 .new-tweet textarea {
   padding: 8px 4px 4px 8px;
   width: 100%;
+}
+
+.new-tweet input {
+  float: left;
+}
+ 
+.new-tweet p {
+  color: red;
+  float: left;
+  font-size: 0.7em;
+  margin: 0;
+  padding: 5px 0 0 10px;
 }
