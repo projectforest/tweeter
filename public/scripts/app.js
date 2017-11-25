@@ -4,41 +4,59 @@
  * Reminder: Use (and do all your DOM work in) jQuery's document ready function
  */
 
+function timeSince(date) {
+
+  const seconds = Math.floor((new Date() - date) / 1000);
+  let interval = Math.floor(seconds / 31536000);
+
+  if (interval > 1) {
+    return `${interval} year(s) ago`;
+  }
+  interval = Math.floor(seconds / 2592000);
+  if (interval > 1) {
+    return `${interval} month(s) ago`;
+  }
+  interval = Math.floor(seconds / 86400);
+  if (interval > 1) {
+    return `${interval} day(s) ago`;
+  }
+  interval = Math.floor(seconds / 3600);
+  if (interval > 1) {
+    return `${interval} hour(s) ago`;
+  }
+  interval = Math.floor(seconds / 60);
+  if (interval > 1) {
+    return `${interval} minute(s) ago`;
+  }
+  return `${Math.floor(seconds)} second(s) ago`;
+}
+
 $(document).ready( () => {
 
-  // handles toggling of new-tweet section
-  function toggleHanlder() {
-    $('#nav-bar .compose').on('click', function() {
-      $('section.new-tweet').slideToggle('fast', function() {
-        $(this).find('.input').focus();
-      });
-    });
-  }
-
-  toggleHanlder();
+  
 
   // precondition take in tweet object, returns single tweet article HTML
   function createTweetElement(tweet) {
 
-    function escape(str) {
-      let p = $('<p>').text(str);
-      return p[0].innerHTML;
-    }
+    // function escape(str) {
+    //   let p = $('<p>').text(str);
+    //   return p[0].innerHTML;
+    // }
     // recursion for escaping entire tweet
-    function sanitize(obj) {
-      for(let key in obj) {
-        if(obj.hasOwnProperty(key)) {
-          if(obj[key].constructor === Object) {
-            sanitize(obj[key]);
-          } else if (obj[key].constructor === String) {
-            obj[key] = escape(obj[key]);
-          }
-        }
-      }
-    }
-    sanitize(tweet);
+    // function sanitize(obj) {
+    //   for(let key in obj) {
+    //     if(obj.hasOwnProperty(key)) {
+    //       if(obj[key].constructor === Object) {
+    //         sanitize(obj[key]);
+    //       } else if (obj[key].constructor === String) {
+    //         obj[key] = escape(obj[key]);
+    //       }
+    //     }
+    //   }
+    // }
+    // sanitize(tweet);
 
-    const createdAt = new Date(tweet.createdAt).toString().split(' ').slice(0, 4).join(' ');
+    const createdAt = timeSince(tweet.createdAt);
 
     let avatar = $('<img>').addClass('avatar').attr('src', tweet.user.avatars.small);
     let user = $('<h1>').addClass('user').text(tweet.user.name);
@@ -74,6 +92,17 @@ $(document).ready( () => {
   }
 
   loadTweets();
+
+  // handles toggling of new-tweet section
+  function toggleHandler() {
+    $('#nav-bar .compose').on('click', function() {
+      $('section.new-tweet').slideToggle('fast', function() {
+        $(this).find('.input').focus();
+      });
+    });
+  }
+ 
+  toggleHandler();
 
   function submitHandler() {
     const form = $('.new-tweet .tweet-form');
@@ -133,6 +162,10 @@ $(document).ready( () => {
       }
     });
 
+    $(button).on('click', () => {
+      errors.check();
+    });
+
     // submits form if user enters while in text area
     $(input).on('keydown', event => {
       if(!errors.exist() && event.key === 'Enter') {
@@ -141,9 +174,6 @@ $(document).ready( () => {
       }
     });
 
-    $(button).on('click', () => {
-      errors.check();
-    });
 
     $(form).on('submit', event => {
       event.preventDefault();
@@ -156,7 +186,7 @@ $(document).ready( () => {
   submitHandler();
 
   function likeHandler() {
-    $('.tweets').on('click', '.fa-heart', function(event) {
+    $('.tweets').on('click', '.fa-heart', function() {
       const heart = $(this);
       if(heart.hasClass('liked')) {
         heart.removeClass('liked');
