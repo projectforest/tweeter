@@ -35,10 +35,10 @@ MongoClient.connect(MONGODB_URI, (err, db) => {
   if(err) {
     throw err;
   } 
-  else {
-    console.log(`Connected to ${MONGODB_URI}`);
-    app.use('/tweets', tweetsRoutes(DataHelpers(db)));
-  }
+  console.log(`Connected to ${MONGODB_URI}`);
+  app.use('/tweets', tweetsRoutes(DataHelpers(db)));
+  //db.close();
+  
 });
 
 app.listen(PORT, () => {
