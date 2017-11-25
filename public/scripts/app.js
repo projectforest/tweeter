@@ -9,29 +9,30 @@ function timeSince(date) {
   const seconds = Math.floor((new Date() - date) / 1000);
   let interval = Math.floor(seconds / 31536000);
 
-  if (interval > 1) {
+  if (interval >= 1) {
     return `${interval} year(s) ago`;
   }
   interval = Math.floor(seconds / 2592000);
-  if (interval > 1) {
+  if (interval >= 1) {
     return `${interval} month(s) ago`;
   }
   interval = Math.floor(seconds / 86400);
-  if (interval > 1) {
+  if (interval >= 1) {
     return `${interval} day(s) ago`;
   }
   interval = Math.floor(seconds / 3600);
-  if (interval > 1) {
+  if (interval >= 1) {
     return `${interval} hour(s) ago`;
   }
   interval = Math.floor(seconds / 60);
-  if (interval > 1) {
+  if (interval >= 1) {
     return `${interval} minute(s) ago`;
   }
-  return `${Math.floor(seconds)} second(s) ago`;
+  //fixed bug -1 second
+  return `${Math.floor(seconds+1)} second(s) ago`;
 }
 
-$(document).ready( () => {
+$(document).ready(() => {
 
   
 
@@ -108,78 +109,83 @@ $(document).ready( () => {
     const form = $('.new-tweet .tweet-form');
     const error = form.find('.error');
     const input = form.find('.input');
-    const button = form.find('input[type="Submit"]');
+    const button = form.find('.submit');
     const counter = form.find('.counter');
 
     // posts to /tweets, displays tweet when successful
-    function postForm(route, selector) {
-      $.post(route, form.serialize())
+    function postTweet() {
+      $.post('tweets', form.serialize())
        .then(function(tweet) {
-         $(selector).prepend(createTweetElement(tweet));
+         $('.tweets').prepend(createTweetElement(tweet));
          input.val('').focus();
          counter.text(140);
        });
     }
 
     //check for input when exceed limit
+    const errorTypes = {
+      empty: {
+        conditions:
+          () => {
+            return [input.val().trim() === '', input.val() === null];
+          },
+        message: 'Error: Input cannot be empty'
+      },
+      exceeds: {
+        conditions:
+          () => {
+            return [140 - input.val().length < 0];
+          },
+        message: 'Error: Input exceeds 140 characters'
+      }
+    };
     const errors = {
-      exist:
+      show:
         () => {
-          conditions = [
-            input.val() === null,
-            140 - input.val().length < 0,
-            $.trim(input.val()) === ''
-          ];
-          for(c of conditions){
-            if(c) {
-              return true;
+          error.text('');
+          for(type in errorTypes) {
+            for(let c of errorTypes[type].conditions()){
+              if(c) {
+                error.text(errorTypes[type].message);
+                return true;
+              }
             }
           }
           return false;
         },
-      check:
+      hide:
         () => {
           error.text('');
-          if(input.val() === '' || input.val() === null) {
-            error.text('Error: Input cannot be empty');
-          }
-          if(140 - input.val().length < 0) {
-            error.text('Error: Input exceeds 140 characters');
-          }
-          return;
         }
     };
 
     // display error in text area according 
     $(input).on('input', () => {
-      errors.check();
+      errors.show();
     });
 
     // prevent enter key from pressed
     $(input).on('keypress', event => {
-      if(event.key === 'Enter') {
-        event.preventDefault();
-      }
+      event.key !== 'Enter' || event.preventDefault();
+    });
+
+    $(input).on('blur', () => {
+      errors.hide();
     });
 
     $(button).on('click', () => {
-      errors.check();
+      errors.show();
     });
 
     // submits form if user enters while in text area
     $(input).on('keydown', event => {
-      if(!errors.exist() && event.key === 'Enter') {
-        event.preventDefault();
-        postForm('tweets', '.tweets');
-      }
+      errors.show() || event.key !== 'Enter' || postTweet();
     });
 
 
     $(form).on('submit', event => {
       event.preventDefault();
-      if(!errors.exist()) {
-        postForm('tweets', '.tweets');
-      }
+      errors.show() || postTweet();
     });
 
   }
@@ -188,14 +194,14 @@ $(document).ready( () => {
   function likeHandler() {
     $('.tweets').on('click', '.fa-heart', function() {
       const heart = $(this);
-      if(heart.hasClass('liked')) {
-        heart.removeClass('liked');
-        heart.css('color', '');
-      } 
-      else {
-        heart.addClass('liked');
-        heart.css('color', 'red');
-      }
+      // if(heart.hasClass('liked')) {
+      //   heart.removeClass('liked');
+      //   heart.css('color', '');
+      // } 
+      // else {
+      //   heart.addClass('liked');
+      //   heart.css('color', 'red');
+      // }
       let tweetID = heart.closest('.tweet').data('tweet-id');
       $.post('tweets/' + tweetID).then(function(err, res) {
         if(err) {
